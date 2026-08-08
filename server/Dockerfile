@@ -1,11 +1,13 @@
 # ---- Multi-stage build (12-factor, Railway-friendly) ----
 # Base image Node 20-alpine. Railway inject DATABASE_URL otomatis dari
 # Postgres add-on; tidak perlu file credential apa pun di container.
+# NOTE: Railway build context = root repo, jadi semua COPY merujuk ke
+# folder server/ (sesuai letak kode di repo ini).
 FROM node:20-alpine AS build
 WORKDIR /app
-COPY package*.json ./
+COPY server/package*.json ./
 RUN npm ci --omit=dev
-COPY . .
+COPY server/ ./
 
 # Runtime image: jauh lebih kecil & tidak mengandung devDeps/build tools.
 FROM node:20-alpine AS runtime
