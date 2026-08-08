@@ -21,7 +21,7 @@
 
 // --- Server Node.js (API Gateway) ---
 // URL dasar server (tanpa trailing slash, pakai skema https://). Hanya default awal; nilai aktual di NVS & diatur lewat app Flutter.
-#define DEFAULT_SERVER_BASE_URL "https://trimharvest-server-production.up.railway.app"
+#define DEFAULT_SERVER_BASE_URL "https://trimharvest-server-production-f7d1.up.railway.app"
 // Default awal, bisa ditimpa lewat provisioning app. Server dihosting di Railway (domain *.up.railway.app).
 
 // Root CA (PEM) untuk validasi TLS server. KOSONGKAN ("") hanya untuk dev/lokal — firmware lalu pakai setInsecure() & cetak peringatan. Produksi: isi root CA penerbit (mis. ISRG Root X1).
