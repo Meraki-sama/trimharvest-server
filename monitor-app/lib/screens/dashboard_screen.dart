@@ -228,9 +228,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             tooltip: 'Buku Panduan',
             icon: const Icon(Icons.menu_book_outlined),
             onPressed: () => AppRoute.push(context, const UserGuideScreen()),
-            // Buka buku panduan (manual penggunaan app) kapan saja sebagai
-            //   pengganti tutorial interaktif. Tidak mengubah flag
-            //   onboarding_done.
+            // Buka buku panduan (manual penggunaan app) kapan saja.
+            //   Layar ini STATIS, bukan tutorial interaktif.
           ),
           IconButton(
             tooltip: 'Ganti Password',

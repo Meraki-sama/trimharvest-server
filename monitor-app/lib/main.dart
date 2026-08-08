@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'services/api_client.dart';
 import 'services/secure_storage_service.dart';
@@ -11,7 +10,6 @@ import 'theme.dart';
 import 'screens/server_setup_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
-import 'screens/onboarding_screen.dart';
 import 'screens/splash_screen.dart';
 
 void main() async {
@@ -99,15 +97,9 @@ class AppGate extends StatefulWidget {
   State<AppGate> createState() => _AppGateState();
 }
 
-enum _GateStatus { loading, needsOnboarding, needsServerSetup, needsLogin, ready }
-// Status URUTAN LOGIS: loading -> needsOnboarding (tutorial SEKALI,
-//   PALING AWAL supaya pengguna baru paham alur) -> needsServerSetup
-//   (server BELUM diatur) -> needsLogin (belum login) -> ready.
-
-const _onboardingKey = 'onboarding_done';
-// Kunci SharedPreferences untuk menandai tutorial sudah dilihat.
-//   Disimpan di SharedPreferences biasa (bukan secure) -- flag UI,
-//   bukan data sensitif.
+enum _GateStatus { loading, needsServerSetup, needsLogin, ready }
+// Status URUTAN LOGIS: loading -> needsServerSetup (server BELUM diatur)
+//   -> needsLogin (belum login) -> ready.
 
 class _AppGateState extends State<AppGate> {
   _GateStatus _status = _GateStatus.loading;
@@ -119,14 +111,6 @@ class _AppGateState extends State<AppGate> {
   }
 
   Future<void> _resolveStatus() async {
-    // Cek tutorial dulu: kalau BELUM pernah dilihat, tampilkan
-    //   OnboardingScreen SEBELUM layar apapun (server setup/login).
-    final prefs = await SharedPreferences.getInstance();
-    final onboardingDone = prefs.getBool(_onboardingKey) ?? false;
-    if (!onboardingDone) {
-      setState(() => _status = _GateStatus.needsOnboarding);
-      return;
-    }
     final serverUrl = await SecureStorageService.instance.readServerBaseUrl();
     if (serverUrl == null || serverUrl.isEmpty) {
       setState(() => _status = _GateStatus.needsServerSetup);
@@ -150,14 +134,6 @@ class _AppGateState extends State<AppGate> {
     setState(() => _status = stillValid ? _GateStatus.ready : _GateStatus.needsLogin);
   }
 
-  // Dipanggil saat onboarding selesai (tombol Mulai/Lewati): tandai
-  //   flag & lanjutkan evaluasi status normal.
-  Future<void> _finishOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_onboardingKey, true);
-    _resolveStatus();
-  }
-
   @override
   Widget build(BuildContext context) {
     switch (_status) {
@@ -167,11 +143,6 @@ class _AppGateState extends State<AppGate> {
         //   `readServerBaseUrl()`/`isLoggedIn()` cuma baca dari secure
         //   storage LOKAL (bukan request jaringan), status ini BIASANYA
         //   hanya terlihat SEKILAS (milidetik) saat app pertama dibuka.
-      case _GateStatus.needsOnboarding:
-        return OnboardingScreen(onDone: _finishOnboarding);
-        // Tampilkan tutorial SEKALI (sebelum server setup/login).
-        //   Saat selesai, `_finishOnboarding` menandai flag & memanggil
-        //   `_resolveStatus()` lagi -> lanjut ke server setup/login/ready.
       case _GateStatus.needsServerSetup:
         return ServerSetupScreen(onDone: _resolveStatus);
         // `onDone: _resolveStatus` -- callback yang DIBERIKAN adalah

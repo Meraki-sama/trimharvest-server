@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 
 // Layar pembuka (splash) ber-branding TrimHarvest -- menggantikan
-// spinner polos saat app memutuskan rute awal (onboarding/login/dashboard).
+// spinner polos saat app memutuskan rute awal (server setup/login/dashboard).
 // Memberi kesan "produk jadi" di detik pertama, bukan layar kosong/abu.
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
