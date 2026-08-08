@@ -25,4 +25,11 @@ bool wifiProvisionIsActive();
 void applyWifiUpdate(const String &ssid, const String &password);
 // Resiliensi: perubahan jarak jauh berisiko salah SSID/password tetap punya fallback AP fisik, gateway tak pernah terkunci permanen.
 
+// Hapus HANYA kredensial WiFi tersimpan (SSID & password) di NVS, TANPA
+//   menghapus identitas device (device_id/secret/server_url). Dipakai saat
+//   server membalas 401 (device dianggap sudah dihapus di sisi server) supaya
+//   gateway otomatis lupa WiFi & masuk mode setup AP lagi, siap dipasang ulang
+//   ke rumah/akun lain. Callernya yang melakukan ESP.restart() setelah ini.
+void clearWifiOnly();
+
 #endif

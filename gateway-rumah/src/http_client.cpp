@@ -149,7 +149,8 @@ static uint64_t currentUnixMillis() {
     //   presisi detik sudah lebih dari cukup.
 }
 
-bool httpIngest(JsonDocument &bodyDoc, JsonDocument &outResponse) {
+bool httpIngest(JsonDocument &bodyDoc, JsonDocument &outResponse, int &outHttpCode) {
+    outHttpCode = -1; // belum ada respons HTTP (gagal sebelum request dikirim)
     if (WiFi.status() != WL_CONNECTED) {
         Serial.println("httpIngest: WiFi belum tersambung, dibatalkan.");
         return false;
@@ -235,6 +236,7 @@ bool httpIngest(JsonDocument &bodyDoc, JsonDocument &outResponse) {
     String url = serverUrl + "/api/ingest";
     if (!http.begin(client, url)) {
         Serial.println("httpIngest: gagal memulai koneksi HTTPS (cek server_url).");
+        outHttpCode = 0; // gagal level koneksi, bukan respons HTTP
         return false;
         // http.begin() bisa gagal kalau URL malformed (mis. server_url
         //   hasil provisioning salah ketik) -- dicek eksplisit di sini.
@@ -254,6 +256,7 @@ bool httpIngest(JsonDocument &bodyDoc, JsonDocument &outResponse) {
     //   serialisasi kedua yang urutan key-nya berbeda).
 
     if (code != 200) {
+        outHttpCode = code; // kode respons HTTP sungguhan (termasuk 401)
         Serial.printf("httpIngest: server membalas kode %d (bukan 200).\n", code);
         if (code > 0) {
             // `code` NEGATIF berarti error tingkat KONEKSI (timeout,
@@ -268,6 +271,7 @@ bool httpIngest(JsonDocument &bodyDoc, JsonDocument &outResponse) {
         return false;
     }
 
+    outHttpCode = 200;
     String responseBody = http.getString();
     http.end();
     // `http.end()` WAJIB dipanggil untuk melepas koneksi/resource

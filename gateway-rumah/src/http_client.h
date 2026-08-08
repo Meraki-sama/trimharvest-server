@@ -15,7 +15,8 @@ bool isTimeSynced();
 // Gagal cepat lokal: kalau tahu request pasti ditolak, lebih baik tidak mengirimnya.
 
 // Kirim bodyDoc (lihat /PROTOCOL.md 2.2; jangan isi "seq" sendiri) ke POST /api/ingest, ditandatangani HMAC. True kalau server 200 OK; outResponse berisi JSON respons (termasuk "commands" kalau ada).
-bool httpIngest(JsonDocument &bodyDoc, JsonDocument &outResponse);
+// outHttpCode mengembalikan kode status HTTP mentah dari server (200, 401, dll) -- dipakai caller untuk mendeteksi 401 (device dihapus di server) guna memicu reset WiFi.
+bool httpIngest(JsonDocument &bodyDoc, JsonDocument &outResponse, int &outHttpCode);
 // Fungsi inti: isi "seq" otomatis, susun header X-Device-Id/X-Timestamp/X-Signature, POST HTTPS, parse respons ke outResponse (via referensi).
 
 #endif

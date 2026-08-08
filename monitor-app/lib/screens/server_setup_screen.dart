@@ -6,7 +6,7 @@ import '../theme.dart';
 // URL server default (Railway). Dipakai sebagai nilai awal field & tombol
 // "Gunakan Server Default" supaya pengguna TIDAK perlu mengetik URL manual
 // setiap pasang app di HP baru. Ganti nilai ini kalau server pindah host.
-const String kDefaultServerUrl = 'https://trimharvest-server-production.up.railway.app';
+const String kDefaultServerUrl = 'https://trimharvest-server-production-f7d1.up.railway.app';
 
 // Layar pertama kali app dibuka: minta URL server (Node.js API Gateway,
 // lihat /server di root repo) sebelum apa pun lain bisa dilakukan --

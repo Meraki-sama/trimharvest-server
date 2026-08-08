@@ -466,3 +466,20 @@ void applyWifiUpdate(const String &ssid, const String &password) {
     //   ternyata SALAH, otomatis jatuh ke mode setup AP (lihat logika di
     //   wifiProvisionBegin() di atas) -- TIDAK PERNAH terkunci permanen.
 }
+
+void clearWifiOnly() {
+    // Hapus HANYA kredensial WiFi (SSID & password) dari NVS namespace
+    //   "wifi_cfg" -- identitas device (device_id/secret/server_url di
+    //   namespace "device_cfg") SENGAJA TIDAK dihapus, supaya gateway tetap
+    //   "ingat" siapa dirinya tapi LUPA jaringan WiFi yang terakhir dipakai.
+    //   Setelah caller memanggil ESP.restart(), wifiProvisionBegin() akan
+    //   mencoba konek dengan SSID kosong -> GAGAL -> otomatis masuk mode
+    //   setup AP (Gateway-Setup-<DEVICE_ID>) menunggu provisioning ulang.
+    //   Ini dipicu saat server membalas 401 (device dihapus di sisi server),
+    //   sehingga menghapus device di app = gateway otomatis lupa WiFi.
+    Serial.println("clearWifiOnly: menghapus kredensial WiFi tersimpan (tetap pertahankan identitas device)...");
+    prefs.remove(PREF_KEY_SSID);
+    prefs.remove(PREF_KEY_PASS);
+    // Tidak restart di sini -- caller (main.cpp) yang mengatur urutan restart
+    //   supaya log/serial sempat tercetak & tidak ada double-restart.
+}

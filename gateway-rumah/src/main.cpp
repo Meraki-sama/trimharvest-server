@@ -168,12 +168,25 @@ static void processServerCommands(JsonArray commands) {
     }
 }
 
-static void handleIngestResponse(bool ok, JsonDocument &response) {
+static void handleIngestResponse(bool ok, JsonDocument &response, int httpCode = -1) {
     // Fungsi kecil pembantu yang dipanggil SETELAH SETIAP httpIngest()
     //   (baik dari uplink data sensor maupun heartbeat) -- memastikan
     //   command yang dititipkan server SELALU diproses terlepas dari
     //   JALUR mana yang memicu request ke server (data sensor ATAU
     //   heartbeat keduanya bisa "membawa pulang" command tertunda).
+    // httpCode: kode status HTTP mentah dari server (lihat http_client.cpp).
+    if (!ok && httpCode == 401) {
+        // Server membalas 401 = device ini TIDAK dikenali lagi (sudah
+        //   dihapus di sisi server, mis. lewat app Flutter). Sesuai
+        //   permintaan, gateway otomatis menghapus WiFi tersimpan agar
+        //   siap dipasang ulang ke rumah/akun lain, lalu restart masuk
+        //   mode setup AP. Identitas device SENGAJA dipertahankan.
+        Serial.println("Server 401: device dianggap dihapus -> reset WiFi & restart...");
+        clearWifiOnly();
+        delay(200);
+        ESP.restart();
+        return;
+    }
     if (!ok) return;
     // Kalau request GAGAL (httpIngest return false), `response` tidak
     //   berisi data yang valid untuk diproses -- keluar lebih awal.
@@ -288,7 +301,8 @@ void loop() {
             outDoc["psv"] = nodeDoc["psv"] | 0;
 
             JsonDocument response;
-            bool ok = httpIngest(outDoc, response);
+            int code = 0;
+            bool ok = httpIngest(outDoc, response, code);
             if (ok) {
                 Serial.println("Data sensor diteruskan ke server.");
             } else {
@@ -303,7 +317,7 @@ void loop() {
                 //   dibanding kompleksitas menambahkan antrian retry
                 //   penuh di mikrokontroler dengan RAM terbatas).
             }
-            handleIngestResponse(ok, response);
+            handleIngestResponse(ok, response, code);
         } else {
             Serial.println("Data dari node tidak dikenali formatnya, diabaikan.");
         }
@@ -334,8 +348,9 @@ void loop() {
         //   gateway_power_save (lihat server/src/routes/ingest.js).
 
         JsonDocument response;
-        bool ok = httpIngest(hbDoc, response);
-        handleIngestResponse(ok, response);
+        int code = 0;
+        bool ok = httpIngest(hbDoc, response, code);
+        handleIngestResponse(ok, response, code);
         // PENTING: heartbeat JUGA memanggil handleIngestResponse() --
         //   ini yang membuat command dari server (rekey, restart, dst)
         //   TETAP bisa sampai ke gateway walau KEBETULAN tidak ada data
