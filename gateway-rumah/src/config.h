@@ -67,7 +67,7 @@ static const char SERVER_ROOT_CA_PEM[] =
 // Placeholder aman: tidak terdaftar di server mana pun, sehingga gagal auth (berbeda dari LORA_PSK yang berbahaya kalau dibiarkan).
 
 // Pre-shared key enkripsi+tanda tangan LoRa ke/dari node. HARUS SAMA PERSIS dengan LORA_PSK di config.h node.
-#define LORA_PSK "D38A2529E0B8CEA76AD74825FF49FB76E93A29B1939ABE571B0770150CCC07D4"
+#define LORA_PSK "2b27d706f21b6f5408088b06a7ce4a5bd62c2706f1e85a5daf7b11ea2c737d29"
 // Harus sama karakter demi karakter dengan node; sebaiknya diganti acak unik per pasang node+gateway yang dipasang.
 
 // Cegah flash produksi memakai kredensial contoh: kompilasi gagal kalau LORA_PSK masih placeholder.

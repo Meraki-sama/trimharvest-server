@@ -200,7 +200,7 @@
 // LORA_PSK di firmware gateway (iot-gateway-rumah), jangan pernah dipakai
 // apa adanya dari repo ini. Generate nilai acak baru dengan:
 //   python3 -c "import secrets; print(secrets.token_hex(32))"
-#define LORA_PSK "D38A2529E0B8CEA76AD74825FF49FB76E93A29B1939ABE571B0770150CCC07D4"
+#define LORA_PSK "2b27d706f21b6f5408088b06a7ce4a5bd62c2706f1e85a5daf7b11ea2c737d29"
 // PERINGATAN UNTUK SIDANG/PRODUKSI: nilai di baris ini bukan lagi
 //   placeholder generik (sudah berupa hex 64 karakter acak), TAPI karena
 //   ada di dalam repository/kode sumber yang mungkin dibagikan, nilai ini
