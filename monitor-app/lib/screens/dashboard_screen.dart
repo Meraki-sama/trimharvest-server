@@ -225,13 +225,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
           ),
           IconButton(
-            tooltip: 'Buku Panduan',
-            icon: const Icon(Icons.menu_book_outlined),
-            onPressed: () => AppRoute.push(context, const UserGuideScreen()),
-            // Buka buku panduan (manual penggunaan app) kapan saja.
-            //   Layar ini STATIS, bukan tutorial interaktif.
-          ),
-          IconButton(
             tooltip: 'Ganti Password',
             icon: const Icon(Icons.lock_outline),
             onPressed: () => AppRoute.push(context, const ChangePasswordScreen()),

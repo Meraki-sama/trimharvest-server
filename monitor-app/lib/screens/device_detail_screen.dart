@@ -14,7 +14,6 @@ import '../models/thresholds.dart';
 import '../services/api_client.dart';
 import '../services/secure_storage_service.dart';
 import '../widgets/reading_card.dart';
-import '../widgets/sparkline.dart';
 import '../route_transitions.dart';
 import 'calibration_screen.dart';
 
@@ -171,6 +170,65 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       //   `value` bukan null.
     }
     return values;
+  }
+
+  // TAMPILAN RIWAYAT BERBASIS ANGKA (pengganti Sparkline/grafik):
+  //   menampilkan beberapa nilai terakhir + hasil penghitungan rata-rata.
+  //   Lebih informatif untuk pembacaan cepat daripada garis tren.
+  Widget _buildHistoryNumbers(String readingId, double? threshold) {
+    final values = _historyFor(readingId);
+    if (values.isEmpty) {
+      return const Text('Belum ada data riwayat.',
+          style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey));
+    }
+    final avg = values.reduce((a, b) => a + b) / values.length;
+    // Ambil 5 nilai terbaru (urutan di `_history` sudah lama->baru,
+    //   jadi ambil dari belakang).
+    final recent = values.length > 5 ? values.sublist(values.length - 5) : values;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Baris rata-rata (hasil penghitungan) -- bagian paling penting.
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.calculate_outlined, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                'Rata-rata: ${avg.toStringAsFixed(1)}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              if (threshold != null) ...[
+                const SizedBox(width: 8),
+                Text('(patokan ${threshold.toStringAsFixed(1)})',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        // Beberapa nilai terakhir sebagai angka mentah.
+        Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          children: [
+            const Text('Terakhir:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            for (final v in recent.reversed)
+              Chip(
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+                label: Text(v.toStringAsFixed(1)),
+              ),
+          ],
+        ),
+      ],
+    );
   }
 
   Future<void> _sendCommand(Map<String, dynamic> command, {String? successMessage}) async {
@@ -723,10 +781,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Sparkline(
-                  values: _historyFor(r.id),
-                  threshold: _thresholds[r.id],
-                ),
+                // TAMPILAN RIWAYAT BERBASIS ANGKA (bukan grafik):
+                // menampilkan beberapa nilai terakhir + rata-rata,
+                // sesuai permintaan (data & angka lebih informatif
+                // daripada sparkline untuk pembacaan cepat).
+                _buildHistoryNumbers(r.id, _thresholds[r.id]),
                 const SizedBox(height: 16),
               ],
             ],
