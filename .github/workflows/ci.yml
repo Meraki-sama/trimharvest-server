@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - name: Syntax check
+        run: |
+          for f in $(find src scripts -name '*.js'); do
+            node --check "$f" || exit 1
+          done
+      - name: Unit tests
+        # Test butuh env minimal (fail-fast config). Firebase stub di dalam test.
+        env:
+          FIREBASE_SERVICE_ACCOUNT_PATH: ./fake.json
+          JWT_ACCESS_SECRET: ci_access_secret
+          JWT_REFRESH_SECRET: ci_refresh_secret_different
+          READINGS_TTL_DAYS: 90
+        run: npm test
+
+  firmware:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        board: [node-sawah, gateway-rumah]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+      - name: Lint firmware (${{ matrix.board }})
+        working-directory: ${{ matrix.board }}
+        run: pio check || true   # lint opsional, tidak gagalkan CI kalau belum dikonfigurasi
+      - name: Build firmware (${{ matrix.board }})
+        working-directory: ${{ matrix.board }}
+        run: pio run

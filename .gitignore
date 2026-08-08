@@ -1,7 +1,10 @@
-node_modules
-npm-debug.log
+node_modules/
+.pio/
+.pioenvs/
+.build/
+build/
+.dart_tool/
+.idea/
+.gradle/
+*.local
 .env
-service-account.json
-.DS_Store
-*.md
-test
