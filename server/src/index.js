@@ -109,6 +109,16 @@ app.use('/api/ingest', ingestLimiter, deviceAuth, validate(schemas.ingest), inge
 app.use('/api/devices', deviceRoutes);
 // operatorAuth dipasang DI DALAM deviceRoutes (router.use), bukan di sini.
 
+app.get('/', (_req, res) => {
+  res.json({
+    ok: true,
+    project: 'EKRON',
+    description: 'Sistem Monitoring dan Kendali Jarak Jauh Lahan Pertanian dan Perkebunan berbasis IoT dengan komunikasi LoRa',
+    status: 'online',
+    endpoints: { health: '/health', auth: '/api/auth', ingest: '/api/ingest', devices: '/api/devices' }
+  });
+});
+
 app.use((_req, res) => {
   // Middleware catch-all tanpa path: request yang tak cocok route mana pun → 404.
   res.status(404).json({ ok: false, error: 'not_found' });
